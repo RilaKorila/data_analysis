@@ -30,7 +30,8 @@ class Data:
 
         # 数値データだけ取り出す
         tmp = self.df.copy()
-        self.only_numeric = tmp.drop(self.category_rows, axis=1)
+        tmp = tmp.drop(self.category_rows, axis=1)
+        self.only_numeric = tmp
         self.names = tmp.columns.values
 
 
