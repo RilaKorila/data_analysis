@@ -37,40 +37,52 @@ def vis(d_name):
     if graph == "散布図":
         left, right = st.columns(2)
 
-        with left:  # 散布図の表示
-            x_label = st.selectbox("横軸を選択", data.names)
-        with right:
-            y_label = st.selectbox("縦軸を選択", data.names)
+        if data.prefecture_filter:
+            with left:  # 散布図の表示
+                x_label = st.selectbox("横軸を選択", data.names)
+                y_label = st.selectbox("縦軸を選択", data.names)
+            with right:
+                prefec = st.radio("グラフの色分け", ("総人口", "男性", "女性"))
 
-        # with right:  # 色分けオプション
-        #     coloring = st.radio("グラフの色分け", ("なし", "学年", "性別"))
+            if prefec == "男性":
+                filtered_data = data.df[data.df["属性"].isin(["male"])]
+                fig = px.scatter(
+                    filtered_data,
+                    x=x_label,
+                    y=y_label,
+                )
+            elif prefec == "女性":
+                filtered_data = data.df[data.df["属性"].isin(["female"])]
+                fig = px.scatter(
+                    filtered_data,
+                    x=x_label,
+                    y=y_label,
+                )
+            else:
+                filtered_data = data.df[data.df["属性"].isin(["all"])]
+                fig = px.scatter(
+                    filtered_data,
+                    x=x_label,
+                    y=y_label,
+                )
 
-        # if coloring == "学年":
-        #     fig = px.scatter(data.only_numeric, x=x_label, y=y_label, color="学年")
-        # elif coloring == "性別":
-        #     fig = px.scatter(
-        #         data.only_numeric,
-        #         x=x_label,
-        #         y=y_label,
-        #         color="性別",
-        #     )
-        # else:
-        # fig = px.scatter(
-        #     data.only_numeric,
-        #     x=x_label,
-        #     y=y_label,
-        # )
+        else:
+            with left:  # 散布図の表示
+                x_label = st.selectbox("横軸を選択", data.names)
+            with right:
+                y_label = st.selectbox("縦軸を選択", data.names)
 
-        # 相関係数算出
-        cor = get_corrcoef(data.only_numeric, x_label, y_label)
-        st.write("相関係数：" + str(cor))
+            # グラフ描画
+            fig = px.scatter(
+                data.only_numeric,
+                x=x_label,
+                y=y_label,
+            )
 
+            # 相関係数算出
+            cor = get_corrcoef(data.only_numeric, x_label, y_label)
+            st.write("相関係数：" + str(cor))
         # グラフ描画
-        fig = px.scatter(
-            data.only_numeric,
-            x=x_label,
-            y=y_label,
-        )
         st.plotly_chart(fig, use_container_width=True)
 
     # ヒストグラム

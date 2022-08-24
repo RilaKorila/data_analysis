@@ -9,22 +9,27 @@ class Data:
         if self.title == "A: 市区町村":
             self.path = "./data/SSDSE-A-2022.csv"
             self.category_rows = ["地域コード", "都道府県", "市区町村"]
+            self.prefecture_filter = False
 
         elif self.title == "B: 県別推移":
             self.path = "./data/SSDSE-B-2022.csv"
             self.category_rows = []
+            self.prefecture_filter = False
 
         elif self.title == "C: 家計消費":
             self.path = "./data/SSDSE-C-2022.csv"
-            self.category_rows = []
+            self.category_rows = ["地域コード", "都道府県", "市"]
+            self.prefecture_filter = False
 
         elif self.title == "D: 社会生活":
-            self.path = "./data/SSDSE-D-2022.csv"
-            self.category_rows = []
+            self.path = "./data/SSDSE-D-2021.csv"
+            self.category_rows = ["属性", "都道府県"]
+            self.prefecture_filter = True
 
         else:
             self.path = "./data/SSDSE-E-2022.csv"
-            self.category_rows = []
+            self.category_rows = ["都道府県"]
+            self.prefecture_filter = False
 
         self.df = pd.read_csv(self.path)
 
