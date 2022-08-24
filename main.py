@@ -1,7 +1,8 @@
+import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from data import Data, get_corrcoef
+from data import PREFECTURES, Data, get_corrcoef
 
 
 @st.cache
@@ -35,9 +36,27 @@ def vis(d_name):
     graph = st.sidebar.radio("グラフの種類", ("散布図", "ヒストグラム", "箱ひげ図"))
 
     if graph == "散布図":
-        left, right = st.columns(2)
 
-        if data.prefecture_filter:
+        if data.transition_filter:
+            # 年推移のグラフ: 折れ線グラフで表示
+
+            # 都道府県を選択
+            prefecs = st.multiselect("グラフに表示する都道府県を選択", PREFECTURES)
+            selected_df = pd.DataFrame()
+            for pre in prefecs:
+                selected_df = selected_df.append(data.df[data.df["都道府県"] == pre])
+
+            # 縦軸を選択
+            y_label = st.selectbox("縦軸を選択", data.names)
+
+            # グラフを描画
+            if len(selected_df) == 0:
+                fig = px.line(data.df, x="年", y=y_label, color="都道府県")
+            else:
+                fig = px.line(selected_df, x="年", y=y_label, color="都道府県")
+
+        elif data.prefecture_filter:
+            left, right = st.columns(2)
             with left:  # 散布図の表示
                 x_label = st.selectbox("横軸を選択", data.names)
                 y_label = st.selectbox("縦軸を選択", data.names)
@@ -67,6 +86,7 @@ def vis(d_name):
                 )
 
         else:
+            left, right = st.columns(2)
             with left:  # 散布図の表示
                 x_label = st.selectbox("横軸を選択", data.names)
             with right:
