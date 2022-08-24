@@ -1,3 +1,5 @@
+from calendar import day_abbr
+
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -113,19 +115,13 @@ def vis(d_name):
 
     # 箱ひげ図
     elif graph == "箱ひげ図":
-        box_val_y = st.selectbox("箱ひげ図にする変数を選択", data.names)
-
-        left, right = st.columns(2)
-        with left:  # 散布図の表示
-            fig = px.box(
-                data.only_numeric,
-                x="学年",
-                y=box_val_y,
-            )
+        if d_name == "E: 基本生活":
+            # 箱ひげ図はEのみ
+            box_val_y = st.selectbox("箱ひげ図にする変数を選択", data.names)
+            fig = px.box(data.df, y=box_val_y)
             st.plotly_chart(fig, use_container_width=True)
-        with right:
-            fig = px.box(data.only_numeric, x="性別", y=box_val_y)
-            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.write("このデータは箱ひげ図には対応していません")
 
 
 ## メイン
