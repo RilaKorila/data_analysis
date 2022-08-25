@@ -35,27 +35,12 @@ def vis(d_name):
     st.sidebar.markdown("## いろんなグラフを試してみよう")
 
     # sidebar でグラフを選択
-    graph = st.sidebar.radio("グラフの種類", ("散布図", "ヒストグラム", "箱ひげ図"))
+    graph = st.sidebar.radio("グラフの種類", ("散布図", "ヒストグラム", "箱ひげ図", "折れ線グラフ"))
 
     if graph == "散布図":
 
         if data.transition_filter:
-            # 年推移のグラフ: 折れ線グラフで表示
-
-            # 都道府県を選択
-            prefecs = st.multiselect("グラフに表示する都道府県を選択", PREFECTURES)
-            selected_df = pd.DataFrame()
-            for pre in prefecs:
-                selected_df = selected_df.append(data.df[data.df["都道府県"] == pre])
-
-            # 縦軸を選択
-            y_label = st.selectbox("縦軸を選択", data.names)
-
-            # グラフを描画
-            if len(selected_df) == 0:
-                fig = px.line(data.df, x="年", y=y_label, color="都道府県")
-            else:
-                fig = px.line(selected_df, x="年", y=y_label, color="都道府県")
+            st.warning("このデータは散布図には対応していません")
 
         elif data.prefecture_filter:
             left, right = st.columns(2)
@@ -121,7 +106,30 @@ def vis(d_name):
             fig = px.box(data.df, y=box_val_y)
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.write("このデータは箱ひげ図には対応していません")
+            st.warning("このデータは箱ひげ図には対応していません")
+
+    # 折れ線
+    elif graph == "折れ線グラフ":
+        if data.transition_filter:
+            # 都道府県を選択
+            prefecs = st.multiselect("グラフに表示する都道府県を選択", PREFECTURES)
+            selected_df = pd.DataFrame()
+            for pre in prefecs:
+                selected_df = selected_df.append(data.df[data.df["都道府県"] == pre])
+
+            # 縦軸を選択
+            y_label = st.selectbox("縦軸を選択", data.names)
+
+            # グラフを描画
+            if len(selected_df) == 0:
+                fig = px.line(data.df, x="年", y=y_label, color="都道府県")
+            else:
+                fig = px.line(selected_df, x="年", y=y_label, color="都道府県")
+
+            st.plotly_chart(fig, use_container_width=True)
+
+        else:
+            st.warning("このデータは折れ線グラフに対応していません")
 
 
 ## メイン
