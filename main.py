@@ -72,6 +72,9 @@ def vis(d_name):
                     y=y_label,
                 )
 
+            # グラフ描画
+            st.plotly_chart(fig, use_container_width=True)
+
         else:
             left, right = st.columns(2)
             with left:  # 散布図の表示
@@ -89,8 +92,9 @@ def vis(d_name):
             # 相関係数算出
             cor = get_corrcoef(data.only_numeric, x_label, y_label)
             st.write("相関係数：" + str(cor))
-        # グラフ描画
-        st.plotly_chart(fig, use_container_width=True)
+
+            # グラフ描画
+            st.plotly_chart(fig, use_container_width=True)
 
     # ヒストグラム
     elif graph == "ヒストグラム":
