@@ -115,12 +115,3 @@ def get_corrcoef(data, x_label, y_label):
 #         filtered_data = data
 
 #     return filtered_data
-
-
-# def get_num_data():
-#     tmp = score
-#     # 任意の行をとる
-#     # delete = teams - rows
-#     rows = ["学年", "性別"]
-#     tmp = tmp.drop(rows, axis=1)
-#     return tmp
