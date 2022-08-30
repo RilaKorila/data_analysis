@@ -1,5 +1,3 @@
-from calendar import day_abbr
-
 import pandas as pd
 import plotly.express as px
 import streamlit as st
