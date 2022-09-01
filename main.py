@@ -1,11 +1,11 @@
-import google_auth_httplib2
-import httplib2
+# import google_auth_httplib2
+# import httplib2
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from googleapiclient.http import HttpRequest
+# from google.oauth2 import service_account
+# from googleapiclient.discovery import build
+# from googleapiclient.http import HttpRequest
 
 from data import PREFECTURES, Data, get_corrcoef
 
@@ -14,41 +14,41 @@ SHEET_ID = "RIQusere1l7Y-GpCrevV2C1im-n7auMphOqoWiAfkUE"
 SHEET_NAME = "db"
 
 
-@st.experimental_singleton()
-def connect_to_gsheet():
-    # Create a connection object
-    credentials = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"], scopes=[SCOPE]
-    )
+# @st.experimental_singleton()
+# def connect_to_gsheet():
+#     # Create a connection object
+#     credentials = service_account.Credentials.from_service_account_info(
+#         st.secrets["gcp_service_account"], scopes=[SCOPE]
+#     )
 
-    # Create a new Http() object for every request
-    def build_request(http, *args, **kwargs):
-        new_http = google_auth_httplib2.AuthorizedHttp(
-            credentials, http=httplib2.Http()
-        )
+#     # Create a new Http() object for every request
+#     def build_request(http, *args, **kwargs):
+#         new_http = google_auth_httplib2.AuthorizedHttp(
+#             credentials, http=httplib2.Http()
+#         )
 
-        return HttpRequest(new_http, *args, **kwargs)
+#         return HttpRequest(new_http, *args, **kwargs)
 
-    authorized_http = google_auth_httplib2.AuthorizedHttp(
-        credentials, http=httplib2.Http()
-    )
+#     authorized_http = google_auth_httplib2.AuthorizedHttp(
+#         credentials, http=httplib2.Http()
+#     )
 
-    service = build("sheets", "v4", requestBuilder=build_request, http=authorized_http)
-    gsheet_connector = service.spreadsheets()
+#     service = build("sheets", "v4", requestBuilder=build_request, http=authorized_http)
+#     gsheet_connector = service.spreadsheets()
 
-    return gsheet_connector
+#     return gsheet_connector
 
 
-def add_row_to_gsheet(gsheet_connector, row):
-    gsheet_connector.values().append(
-        spreadsheetId=SHEET_ID,
-        range=f"{SHEET_NAME}!A:E",
-        body=dict(values=row),
-        valueInputOption="USER_ENTERED",
-    ).execute()
+# def add_row_to_gsheet(gsheet_connector, row):
+#     gsheet_connector.values().append(
+#         spreadsheetId=SHEET_ID,
+#         range=f"{SHEET_NAME}!A:E",
+#         body=dict(values=row),
+#         valueInputOption="USER_ENTERED",
+#     ).execute()
 
-## ログ取得用
-gsheet_connector = connect_to_gsheet()
+# ## ログ取得用
+# gsheet_connector = connect_to_gsheet()
 
 @st.cache
 def load_full_data(d_name):
@@ -137,7 +137,7 @@ def vis(d_name):
             st.write("相関係数：" + str(cor))
 
             # グラフ描画
-            add_row_to_gsheet(gsheet_connector, [[text1, text2]])
+            # add_row_to_gsheet(gsheet_connector, [[x_label, y_label]])
             st.plotly_chart(fig, use_container_width=True)
 
     # ヒストグラム
