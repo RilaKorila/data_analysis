@@ -1,9 +1,51 @@
+import google_auth_httplib2
+import httplib2
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import HttpRequest
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
 from data import PREFECTURES, Data, get_corrcoef
 
+
+SCOPE = "https://www.googleapis.com/auth/spreadsheets"
+SHEET_ID = "RIQusere1l7Y-GpCrevV2C1im-n7auMphOqoWiAfkUE"
+SHEET_NAME = "db"
+
+@st.experimental_singleton()
+def connect_to_gsheet():
+    # Create a connection object
+    credentials = service_account.Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"], scopes=[SCOPE]
+    )
+
+    # Create a new Http() object for every request
+    def build_request(http, *args, **kwargs):
+        new_http = google_auth_httplib2.AuthorizedHttp(
+            credentials, http=httplib2.Http()
+        )
+
+        return HttpRequest(new_http, *args, **kwargs)
+
+    authorized_http = google_auth_httplib2.AuthorizedHttp(
+        credentials, http=httplib2.Http()
+    )
+
+    service = build("sheets", "v4", requestBuilder=build_request, http=authorized_http)
+    gsheet_connector = service.spreadsheets()
+
+    return gsheet_connector
+
+
+def add_row_to_gsheet(gsheet_connector, row):
+    gsheet_connector.values().append(
+        spreadsheetId=SHEET_ID,
+        range=f"{SHEET_NAME}!A:E",
+        body=dict(values=row),
+        valueInputOption="USER_ENTERED",
+    ).execute()
 
 @st.cache
 def load_full_data(d_name):
