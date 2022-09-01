@@ -47,6 +47,8 @@ def add_row_to_gsheet(gsheet_connector, row):
         valueInputOption="USER_ENTERED",
     ).execute()
 
+## ログ取得用
+gsheet_connector = connect_to_gsheet()
 
 @st.cache
 def load_full_data(d_name):
@@ -135,6 +137,7 @@ def vis(d_name):
             st.write("相関係数：" + str(cor))
 
             # グラフ描画
+            add_row_to_gsheet(gsheet_connector, [[text1, text2]])
             st.plotly_chart(fig, use_container_width=True)
 
     # ヒストグラム
