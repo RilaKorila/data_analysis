@@ -1,18 +1,18 @@
 import google_auth_httplib2
 import httplib2
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from googleapiclient.http import HttpRequest
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import HttpRequest
 
 from data import PREFECTURES, Data, get_corrcoef
-
 
 SCOPE = "https://www.googleapis.com/auth/spreadsheets"
 SHEET_ID = "RIQusere1l7Y-GpCrevV2C1im-n7auMphOqoWiAfkUE"
 SHEET_NAME = "db"
+
 
 @st.experimental_singleton()
 def connect_to_gsheet():
@@ -46,6 +46,7 @@ def add_row_to_gsheet(gsheet_connector, row):
         body=dict(values=row),
         valueInputOption="USER_ENTERED",
     ).execute()
+
 
 @st.cache
 def load_full_data(d_name):
