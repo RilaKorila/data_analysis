@@ -218,37 +218,43 @@ def vis(d_name):
     # 折れ線
     elif graph == "折れ線グラフ":
         if data.transition_filter:
-            # 都道府県を選択
-            prefecs = st.multiselect("グラフに表示する都道府県を選択", PREFECTURES)
-            selected_df = pd.DataFrame()
-            for pre in prefecs:
-                selected_df = pd.concat([selected_df, data.df[data.df["都道府県"] == pre]])
+            with st.form("line"):
+                # 都道府県を選択
+                prefecs = st.multiselect("グラフに表示する都道府県を選択", PREFECTURES)
+                selected_df = pd.DataFrame()
+                for pre in prefecs:
+                    selected_df = pd.concat(
+                        [selected_df, data.df[data.df["都道府県"] == pre]]
+                    )
 
-            # 縦軸を選択
-            y_label = st.selectbox("縦軸を選択", data.names)
+                # 縦軸を選択
+                y_label = st.selectbox("縦軸を選択", data.names)
 
-            # グラフを描画
-            if len(selected_df) == 0:
-                fig = px.line(data.df, x="年", y=y_label, color="都道府県")
-            else:
-                fig = px.line(selected_df, x="年", y=y_label, color="都道府県")
+                draw_fig_btn = st.form_submit_button("グラフ描画")
 
-            x_label = "".join(list(map(lambda x: x + "_", prefecs)))
-            add_row_to_gsheet(
-                gsheet_connector,
-                [
-                    [
-                        datetime.datetime.now(
-                            datetime.timezone(datetime.timedelta(hours=9))
-                        ).strftime("%Y-%m-%d %H:%M:%S"),
-                        "折れ線",
-                        x_label,
-                        y_label,
-                        "filterなし",
-                    ]
-                ],
-            )
-            st.plotly_chart(fig, use_container_width=True)
+                if draw_fig_btn:
+                    # グラフを描画
+                    if len(selected_df) == 0:
+                        fig = px.line(data.df, x="年", y=y_label, color="都道府県")
+                    else:
+                        fig = px.line(selected_df, x="年", y=y_label, color="都道府県")
+
+                    x_label = "".join(list(map(lambda x: x + "_", prefecs)))
+                    add_row_to_gsheet(
+                        gsheet_connector,
+                        [
+                            [
+                                datetime.datetime.now(
+                                    datetime.timezone(datetime.timedelta(hours=9))
+                                ).strftime("%Y-%m-%d %H:%M:%S"),
+                                "折れ線",
+                                x_label,
+                                y_label,
+                                "filterなし",
+                            ]
+                        ],
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
 
         else:
             st.warning("このデータは折れ線グラフに対応していません")
