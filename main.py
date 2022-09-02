@@ -222,7 +222,7 @@ def vis(d_name):
             prefecs = st.multiselect("グラフに表示する都道府県を選択", PREFECTURES)
             selected_df = pd.DataFrame()
             for pre in prefecs:
-                selected_df = selected_df.append(data.df[data.df["都道府県"] == pre])
+                selected_df = pd.concat([selected_df, data.df[data.df["都道府県"] == pre]])
 
             # 縦軸を選択
             y_label = st.selectbox("縦軸を選択", data.names)
