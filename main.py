@@ -1,54 +1,58 @@
-# import google_auth_httplib2
-# import httplib2
+import datetime
+
+import google_auth_httplib2
+import httplib2
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-# from google.oauth2 import service_account
-# from googleapiclient.discovery import build
-# from googleapiclient.http import HttpRequest
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import HttpRequest
 
 from data import PREFECTURES, Data, get_corrcoef
 
 SCOPE = "https://www.googleapis.com/auth/spreadsheets"
-SHEET_ID = "RIQusere1l7Y-GpCrevV2C1im-n7auMphOqoWiAfkUE"
+SHEET_ID = "1RIQusere1l7Y-GpCrevV2C1im-n7auMphOqoWiAfkUE"
 SHEET_NAME = "db"
 
 
-# @st.experimental_singleton()
-# def connect_to_gsheet():
-#     # Create a connection object
-#     credentials = service_account.Credentials.from_service_account_info(
-#         st.secrets["gcp_service_account"], scopes=[SCOPE]
-#     )
+@st.experimental_singleton()
+def connect_to_gsheet():
+    # Create a connection object
+    credentials = service_account.Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"], scopes=[SCOPE]
+    )
 
-#     # Create a new Http() object for every request
-#     def build_request(http, *args, **kwargs):
-#         new_http = google_auth_httplib2.AuthorizedHttp(
-#             credentials, http=httplib2.Http()
-#         )
+    # Create a new Http() object for every request
+    def build_request(http, *args, **kwargs):
+        new_http = google_auth_httplib2.AuthorizedHttp(
+            credentials, http=httplib2.Http()
+        )
 
-#         return HttpRequest(new_http, *args, **kwargs)
+        return HttpRequest(new_http, *args, **kwargs)
 
-#     authorized_http = google_auth_httplib2.AuthorizedHttp(
-#         credentials, http=httplib2.Http()
-#     )
+    authorized_http = google_auth_httplib2.AuthorizedHttp(
+        credentials, http=httplib2.Http()
+    )
 
-#     service = build("sheets", "v4", requestBuilder=build_request, http=authorized_http)
-#     gsheet_connector = service.spreadsheets()
+    service = build("sheets", "v4", requestBuilder=build_request, http=authorized_http)
+    gsheet_connector = service.spreadsheets()
 
-#     return gsheet_connector
+    return gsheet_connector
 
 
-# def add_row_to_gsheet(gsheet_connector, row):
-#     gsheet_connector.values().append(
-#         spreadsheetId=SHEET_ID,
-#         range=f"{SHEET_NAME}!A:E",
-#         body=dict(values=row),
-#         valueInputOption="USER_ENTERED",
-#     ).execute()
+def add_row_to_gsheet(gsheet_connector, row):
+    gsheet_connector.values().append(
+        spreadsheetId=SHEET_ID,
+        range=f"{SHEET_NAME}!A:E",
+        body=dict(values=row),
+        valueInputOption="USER_ENTERED",
+    ).execute()
 
-# ## ログ取得用
-# gsheet_connector = connect_to_gsheet()
+
+## ログ取得用
+gsheet_connector = connect_to_gsheet()
+
 
 @st.cache
 def load_full_data(d_name):
@@ -115,6 +119,20 @@ def vis(d_name):
                     y=y_label,
                 )
 
+            add_row_to_gsheet(
+                gsheet_connector,
+                [
+                    [
+                        datetime.datetime.now(
+                            datetime.timezone(datetime.timedelta(hours=9))
+                        ).strftime("%Y-%m-%d %H:%M:%S"),
+                        "filtered 散布図",
+                        x_label,
+                        y_label,
+                        prefec,
+                    ]
+                ],
+            )
             # グラフ描画
             st.plotly_chart(fig, use_container_width=True)
 
@@ -137,13 +155,40 @@ def vis(d_name):
             st.write("相関係数：" + str(cor))
 
             # グラフ描画
-            # add_row_to_gsheet(gsheet_connector, [[x_label, y_label]])
+            add_row_to_gsheet(
+                gsheet_connector,
+                [
+                    [
+                        datetime.datetime.now(
+                            datetime.timezone(datetime.timedelta(hours=9))
+                        ).strftime("%Y-%m-%d %H:%M:%S"),
+                        "散布図",
+                        x_label,
+                        y_label,
+                        "filterなし",
+                    ]
+                ],
+            )
             st.plotly_chart(fig, use_container_width=True)
 
     # ヒストグラム
     elif graph == "ヒストグラム":
         hist_val = st.selectbox("変数を選択", data.names)
         fig = px.histogram(data.only_numeric, x=hist_val)
+        add_row_to_gsheet(
+            gsheet_connector,
+            [
+                [
+                    datetime.datetime.now(
+                        datetime.timezone(datetime.timedelta(hours=9))
+                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                    "ヒストグラム",
+                    hist_val,
+                    "-",
+                    "filterなし",
+                ]
+            ],
+        )
         st.plotly_chart(fig, use_container_width=True)
 
     # 箱ひげ図
@@ -152,6 +197,20 @@ def vis(d_name):
             # 箱ひげ図はEのみ
             box_val_y = st.selectbox("箱ひげ図にする変数を選択", data.names)
             fig = px.box(data.df, y=box_val_y)
+            add_row_to_gsheet(
+                gsheet_connector,
+                [
+                    [
+                        datetime.datetime.now(
+                            datetime.timezone(datetime.timedelta(hours=9))
+                        ).strftime("%Y-%m-%d %H:%M:%S"),
+                        "箱ひげ図",
+                        box_val_y,
+                        "-",
+                        "filterなし",
+                    ]
+                ],
+            )
             st.plotly_chart(fig, use_container_width=True)
         else:
             st.warning("このデータは箱ひげ図には対応していません")
@@ -174,6 +233,21 @@ def vis(d_name):
             else:
                 fig = px.line(selected_df, x="年", y=y_label, color="都道府県")
 
+            x_label = "".join(list(map(lambda x: x + "_", prefecs)))
+            add_row_to_gsheet(
+                gsheet_connector,
+                [
+                    [
+                        datetime.datetime.now(
+                            datetime.timezone(datetime.timedelta(hours=9))
+                        ).strftime("%Y-%m-%d %H:%M:%S"),
+                        "折れ線",
+                        x_label,
+                        y_label,
+                        "filterなし",
+                    ]
+                ],
+            )
             st.plotly_chart(fig, use_container_width=True)
 
         else:
